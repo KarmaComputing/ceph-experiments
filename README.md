@@ -194,6 +194,16 @@ https://documentation.suse.com/ses/7.1/html/ses-all/bp-troubleshooting-dashboard
 ceph mgr services | grep dashboard
 ```
 
+## Ceph how to change admin dashboard password
+
+1. Login to one of the ceph servers with `_admin` label
+2. Create a file containing the new password you want for `admin` user
+3. Apply the new password using:
+
+```
+ceph dashboard ac-user-set-password admin -i filename
+```
+
 # 6. connecting a ceph client ubuntu host
 
 src: https://docs.ceph.com/en/quincy/cephfs/mount-prerequisites/
