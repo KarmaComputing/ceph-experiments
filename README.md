@@ -137,7 +137,7 @@ Since each node is on it's own network we need to tell ceph to use `--unmanaged`
 
 Manual management of monitor placement
 
-## Put mons in manual magement mode:
+## Put mons in manual management mode:
 
 ```
 ceph orch apply mon --unmanaged
