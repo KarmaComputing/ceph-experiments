@@ -671,3 +671,56 @@ notes;
 https://ops.tips/blog/lvm-on-loopback-devices/
 https://tracker.ceph.com/issues/51366
 
+## Keep loopback device mounts between reboots
+
+Example systemd file: `/etc/systemd/system/loops-setup.service`
+```
+[Unit]
+Description=Setup loopback devices
+
+DefaultDependencies=no
+
+
+[Service]
+ExecStart=/sbin/losetup /dev/loop8 /var/local/osd/ceph-osd-data-loopbackfile.img
+ExecStop=/sbin/losetup -d /dev/loop8
+
+RemainAfterExit=yes
+Type=oneshot
+
+[Install]
+WantedBy=local-fs-pre.target
+```
+
+Example install of the loopback service for automatic remount:
+```
+systemctl daemon-reload
+systemctl enable loops-setup.service
+systemctl start loops-setup.service
+```
+
+see: https://unix.stackexchange.com/questions/418322/persistent-lvm-device-with-loopback-devices-by-fstab
+see also: https://superuser.com/questions/799162/permanent-loop-device
+# Add back an OSD (including loop) after down/stopped/disconnected
+
+Scenario:
+
+- The disks are fine, you just rebooted/unmounted the disk by accident
+- The osd is currenctly down/out
+
+
+1. Inspect the osd tree 
+2. Mark the osd as back `in`
+3. Stop/start the osd to bring it back
+
+```
+ceph osd in 0
+ceph osd up 0
+lsblk 
+ceph osd tree
+cephadm ceph-volume lvm list
+ceph orch daemon stop osd.0
+ceph orch daemon start osd.0
+```
+
+src https://lists.ceph.io/hyperkitty/list/ceph-users@ceph.io/thread/LLF2VQV2W35QCKJOFOT4XMJSO22QLCWW/
