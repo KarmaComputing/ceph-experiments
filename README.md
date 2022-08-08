@@ -56,6 +56,22 @@ apt-get -qq --yes install podman
 podman --version
 ```
 
+### Centos instal 
+ref 
+```
+#centos dying =/  https://forketyfork.medium.com/centos-8-no-urls-in-mirrorlist-error-3f87c3466faa
+sudo sed -i -e "s|mirrorlist=|#mirrorlist=|g" /etc/yum.repos.d/CentOS-*
+sudo sed -i -e "s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g" /etc/yum.repos.d/CentOS-*
+
+sudo dnf config-manager --set-enabled powertools
+dnf --disablerepo '*' --enablerepo=extras swap centos-linux-repos centos-stream-repos
+
+
+sudo yum -y install podman
+
+dnf install -y python3
+```
+
 
 ### Install `cephadm`
 
@@ -226,7 +242,7 @@ ssh root@<ip> "sudo ceph config generate-minimal-conf" | sudo tee /etc/ceph/ceph
 
 perms
 ```
-chmod 644 /etc/ceph/ceph.conf
+sudo chmod 644 /etc/ceph/ceph.conf
 ```
 
 Create a CephX user and get its secret key:
@@ -548,6 +564,21 @@ https://www.suse.com/support/kb/doc/?id=000019693
 
 https://ops.tips/blog/lvm-on-loopback-devices/
 
+tldr: (must change size and host name)
+```
+mkdir -p /var/local/osd/
+truncate -s 1500G /var/local/osd/ceph-osd-data-loopbackfile.img
+losetup /dev/loop8 /var/local/osd/ceph-osd-data-loopbackfile.img
+echo ",,8e,," | sfdisk /dev/loop8
+partx --update /dev/loop8
+yes | pvcreate /dev/loop8
+vgcreate myvg /dev/loop8
+lvcreate --size 1450G --name lv1 myvg
+ceph orch daemon add osd storage-b:/dev/myvg/lv1
+```
+
+
+Detail:
 
 ```
 sudo mkdir -p /var/local/osd/
@@ -627,13 +658,6 @@ xvda       202:0    0   80G  0 disk
 
 To then add:
 
-```
-apt install ceph-osd
-ceph-volume lvm zap /dev/loop8
-ceph orch daemon add osd ceph-a:
-```
-
-adding??
 
 ```
 root@ceph-a:~# lvdisplay 
