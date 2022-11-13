@@ -210,7 +210,7 @@ https://documentation.suse.com/ses/7.1/html/ses-all/bp-troubleshooting-dashboard
 ceph mgr services | grep dashboard
 ```
 
-## Ceph how to change admin dashboard password
+## Ceph how to change reset admin dashboard password
 
 1. Login to one of the ceph servers with `_admin` label
 2. Create a file containing the new password you want for `admin` user
@@ -748,3 +748,71 @@ ceph orch daemon start osd.0
 ```
 
 src https://lists.ceph.io/hyperkitty/list/ceph-users@ceph.io/thread/LLF2VQV2W35QCKJOFOT4XMJSO22QLCWW/
+
+# Dokku storage mounts
+
+General process
+
+1. create directory per container inside singe Ceph filesystem (non multiple ceph filesystems, isolate per mount point)
+2. Adapt dokku app mounts
+3. Restart dokku app
+
+
+Ensure ceph-common
+```
+apt install ceph-common
+```
+Prepare config
+
+```
+CEPH_IP=<any-ceph-host-ip>
+FS_NAME=<cephfs-name>
+mkdir -p -m 755 /etc/ceph
+mkdir -p /mnt/$FS_NAME
+ssh root@$CEPH_IP "sudo ceph config generate-minimal-conf" | sudo tee /etc/ceph/ceph.conf
+```
+
+Authorise initial user, which is used to create subdirectories inside the
+CephFS for each app.
+
+```
+ssh root@$CEPH_IP "sudo ceph fs authorize $FS_NAME client.ceph-client-parent-user / rw" | sudo tee /etc/ceph/ceph.client.ceph-client-parent-user.keyring
+```
+
+`cat` the secret key:
+```
+cat /etc/ceph/ceph.client.ceph-client-parent-user.keyring
+```
+
+Mount & create subfolder for the app
+```
+mount -t ceph $CEPH_IP:/ /mnt/$FS_NAME/ -o name=ceph-client-client-parent-user,secret=<secret-key>
+```
+
+Create new ceph client user, and mount the storage into the dokku app:
+
+```
+ssh root@$CEPH_IP "sudo ceph fs authorize $FS_NAME client.ceph-client-<app-name> / rw" | sudo tee /etc/ceph/ceph.client.ceph-client-<app-name>.keyring
+```
+
+Mount the directory at the app subdirectory mountpoint
+
+```
+mkdir -p /mnt/$FS_NAME/$APP_NAME
+mount -t ceph $CEPH_IP:/ /mnt/$FS_NAME/$APP_NAME -o name=ceph-client-client-$APP_NAME,secret=<secret-key>
+```
+
+Mount storage into dokku app:
+```
+dokku storage:mount $APP_NAME /mnt/$APP_NAME:/app/storage
+dokku ps:restart $APP_NAME
+```
+
+Verify app storage dir is present & writable
+```
+exec -it $APP_NAME.web.1 bash
+docker exec -it $APP_NAME
+ls -l /app/storage
+touch /app/storage/hello
+ls -l /app/storage
+```
