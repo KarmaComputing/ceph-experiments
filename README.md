@@ -472,6 +472,10 @@ e.g. before:
 
 ```
 
+> lvdisplay LV Status NOT available?
+> If after a rebook the volume has not come back up, it may be brought back available
+> with `lvchange -ay /dev/myvg/lv1` see https://access.redhat.com/solutions/4497071
+
 Resizing logical volume:
 
 1. copy path
