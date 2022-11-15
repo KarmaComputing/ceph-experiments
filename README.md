@@ -539,7 +539,7 @@ ceph orch host label add 486194e3-e416-4022-892e-abc54891e025 _no_schedule
 https://docs.ceph.com/en/latest/rados/operations/add-or-rm-osds/#take-the-osd-out-of-the-cluster
 
 ```
-osd tree
+ceph osd tree
 ceph osd out {osd-num}
 # wait for rebalancing...
 ceph -w
