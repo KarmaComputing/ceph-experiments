@@ -123,8 +123,12 @@ ssh-copy-id -f -i /etc/ceph/ceph.pub root@ceph-b
 
 From the first host, add each of the hosts to the cluster by using `ceph orch host add` and applying the `_admin` label.
 
+On the new host update the hostname:
+```
+hostnamectl set-hostname storage-b
+```
 
-e.g: 
+On an existing node, add the new host
 ```
 ceph orch host add ceph-b <host-ip> _admin
 ```
