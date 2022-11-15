@@ -43,6 +43,7 @@ systemctl stop ufw
 # Install podman
 
 apt-get update -y
+apt-get upgrade -y
 
 source /etc/os-release
 sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list"
