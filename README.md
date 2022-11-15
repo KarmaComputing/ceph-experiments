@@ -50,7 +50,7 @@ sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/libcont
 
 wget -nv https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/xUbuntu_${VERSION_ID}/Release.key -O- | apt-key add -
 
-apt-get update -qq -y
+apt-get update -y
 apt-get -qq --yes install podman
 
 
