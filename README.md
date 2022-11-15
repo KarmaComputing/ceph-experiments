@@ -207,6 +207,7 @@ ceph fs volume create myfs
 
 https://documentation.suse.com/ses/7.1/html/ses-all/bp-troubleshooting-dashboard.html
 ```
+# 1) ssh into any one of the Ceph servers
 ceph mgr services | grep dashboard
 ```
 
