@@ -11,7 +11,7 @@
 <img src="ceph-dashboard.png" alt="Ceph dashboard web interface" />
 
 
-# 1. Create 3 vultr VPS servers
+# 1. Create at least 3 servers
 
 Server requirements:
 
