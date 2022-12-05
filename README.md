@@ -826,3 +826,40 @@ ls -l /app/storage
 touch /app/storage/hello
 ls -l /app/storage
 ```
+
+
+# Ceph RBD
+
+First create a storage pool for rbd
+```
+ceph osd pool create rbd
+```
+
+
+```
+# association application command
+ceph osd pool application enable rbd rbd
+```
+
+Create a client user to connect to the storage pool
+```
+ceph auth add client.test-rbd mon 'profile rbd' osd 'profile rbd pool=rbd' mgr 'profile rbd'
+```
+
+Get the client secret key
+```
+ceph auth get client.test-rbd
+```
+
+Then *on the client*, create the keyring file:
+```
+touch ceph.client.test-rbd.keyring
+```
+With contens from server `ceph auth get client.test-rbd`
+```
+[client.test-rbd]
+	key = changeme/changeme==
+	caps mgr = "profile rbd"
+	caps mon = "profile rbd"
+	caps osd = "profile rbd pool=rbd"
+```
