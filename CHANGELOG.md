@@ -1,3 +1,15 @@
+# v0.0.3 (Sat Apr 15 2023)
+
+#### ⚠️ Pushed to `main`
+
+- Update base.html ([@chrisjsimpson](https://github.com/chrisjsimpson))
+
+#### Authors: 1
+
+- [@chrisjsimpson](https://github.com/chrisjsimpson)
+
+---
+
 # v0.0.2 (Sat Apr 15 2023)
 
 #### ⚠️ Pushed to `main`
