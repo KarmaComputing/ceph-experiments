@@ -871,3 +871,45 @@ removing broken osd's *danger*
 ```
 # ceph orch daemon rm osd.0 --force
 ```
+
+
+`unable to find a keyring on /var/lib/ceph/bootstrap-osd/ceph.keyring: (2) No such file or directory`
+All other cephadm commands appear to properly bootstrap their auth except `cephadm ceph-volume`.
+If you don't use `cephadm shell` (you know that exists- right?) both still aren't bootrapped with auth 
+anyway without the needed auth permission `allow profile bootstrap-osd:
+
+Now you can do lvm osd boostrapping such as:
+```
+# create the auth token you need outside the container
+ceph auth get client.bootstrap-osd > /var/lib/ceph/bootstrap-osd/ceph.keyring
+cat /var/lib/ceph/bootstrap-osd/ceph.keyring
+# copy it
+# Jump inside the container
+cephadm shell
+#.. create (manually, yuk) the auth token from var/lib/ceph/bootstrap-osd/ceph.keyring`
+# Now, still inside the container you can bootstrap your lvm based osd such as:
+ceph-volume lvm prepare --bluestore --data myvg/lv1
+
+# example semi-happy path output:
+ceph-volume lvm prepare --bluestore --data myvg/lv1
+Running command: /usr/bin/ceph-authtool --gen-print-key
+Running command: /usr/bin/ceph --cluster ceph --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring -i - osd new 485bb09e-4a1e-4e5d-8f9a-b171a3cefb37
+Running command: /usr/bin/ceph-authtool --gen-print-key
+Running command: /usr/bin/mount -t tmpfs tmpfs /var/lib/ceph/osd/ceph-0
+Running command: /usr/bin/chown -h ceph:ceph /dev/myvg/lv1
+Running command: /usr/bin/chown -R ceph:ceph /dev/dm-2
+Running command: /usr/bin/ln -s /dev/myvg/lv1 /var/lib/ceph/osd/ceph-0/block
+Running command: /usr/bin/ceph --cluster ceph --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring mon getmap -o /var/lib/ceph/osd/ceph-0/activate.monmap
+ stderr: got monmap epoch 7
+--> Creating keyring file for osd.0
+Running command: /usr/bin/chown -R ceph:ceph /var/lib/ceph/osd/ceph-0/keyring
+Running command: /usr/bin/chown -R ceph:ceph /var/lib/ceph/osd/ceph-0/
+Running command: /usr/bin/ceph-osd --cluster ceph --osd-objectstore bluestore --mkfs -i 0 --monmap /var/lib/ceph/osd/ceph-0/activate.monmap --keyfile - --osd-data /var/lib/ceph/osd/ceph-0/ --osd-uuid 485bb09e-4a1e-4e5d-8f9a-b171a3cefb37 --setuser ceph --setgroup ceph
+ stderr: 2025-03-18T21:09:21.492+0000 7f6ceeb2e440 -1 bluestore(/var/lib/ceph/osd/ceph-0/) _read_fsid unparsable uuid
+ stderr: 2025-03-18T21:09:22.592+0000 7f6ceeb2e440 -1 bluestore::NCB::__restore_allocator::Failed open_for_read with error-code -2
+ stderr: 2025-03-18T21:09:23.628+0000 7f6ceeb2e440 -1 bluestore::NCB::__restore_allocator::Failed open_for_read with error-code -2
+--> ceph-volume lvm prepare successful for: myvg/lv1
+```
+
+`Error EEXIST: entity osd.0 exists but key does not match`:
+`ceph auth del osd.x`
