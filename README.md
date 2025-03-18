@@ -863,3 +863,11 @@ With contens from server `ceph auth get client.test-rbd`
 	caps mon = "profile rbd"
 	caps osd = "profile rbd pool=rbd"
 ```
+
+## Notes 
+
+removing broken osd's *danger*
+
+```
+# ceph orch daemon rm osd.0 --force
+```
